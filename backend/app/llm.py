@@ -20,48 +20,52 @@ def generate_answer(query, retrieved_chunks):
     # Prepare context from retrieved chunks
     context = ""
 
-    for i, result in enumerate(retrieved_chunks):
+    for result in retrieved_chunks:
 
         metadata = result["metadata"]
 
         source = metadata["source"]
-        chunk_index = metadata["chunk_index"]
+        page_number = metadata["page_number"]
 
         context += f"""
-[Source: {source}, Chunk: {chunk_index}]
+    [Source: {source}, Page: {page_number}]
 
-{result['chunk']}
+    {result['chunk']}
 
-"""
+    """
 
     system_prompt = """
-You are a document question-answering assistant.
+        You are a document question-answering assistant.
 
-Your task is to answer questions using ONLY
-the information provided in the context.
+        Your task is to answer questions using ONLY
+        the information provided in the context.
 
-Follow these rules:
+        Follow these rules:
 
-1. Do not use outside knowledge.
-2. Do not invent facts.
-3. If the answer is not present in the context,
-   clearly say that you cannot find the answer
-   in the provided document.
-4. Provide concise and accurate answers.
-5. Cite the source chunk used for your answer.
-6. If multiple chunks support your answer,
-   cite all relevant chunks.
-"""
+        1. Do not use outside knowledge.
+        2. Do not invent facts.
+        3. If the answer is not present in the context,
+        clearly say that you cannot find the answer
+        in the provided document.
+        4. Provide concise and accurate answers.
+        5. Cite the source document name and PDF page number
+        used to support your answer.
+        6. If multiple pages support your answer,
+        cite all relevant pages.
+        7. Use this citation format:
+        [Source: filename.pdf, Page: 5]
+        8. Do not invent or guess source names or page numbers.
+        """
 
     user_prompt = f"""
-Context:
-{context}
+        Context:
+        {context}
 
-Question:
-{query}
+        Question:
+        {query}
 
-Provide an answer with source citations.
-"""
+        Provide an answer with source citations.
+        """
 
     response = client.chat.completions.create(
         model=MODEL_NAME,

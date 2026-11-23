@@ -16,17 +16,29 @@ collection = client.get_or_create_collection(
 )
 
 
-def store_chunks(chunks, embeddings):
+def store_chunks(
+    chunks,
+    embeddings,
+    page_metadata,
+    document_id,
+    source
+):
 
-    ids = [f"chunk_{i}" for i in range(len(chunks))]
-
-    metadatas = [
-        {
-            "source": "sample.pdf",
-            "chunk_index": i
-        }
+    ids = [
+        f"{document_id}_chunk_{i}"
         for i in range(len(chunks))
     ]
+
+    metadatas = []
+
+    for i, page_info in enumerate(page_metadata):
+
+        metadatas.append({
+            "source": source,
+            "document_id": document_id,
+            "chunk_index": i,
+            "page_number": page_info["page_number"]
+        })
 
     collection.upsert(
         ids=ids,
