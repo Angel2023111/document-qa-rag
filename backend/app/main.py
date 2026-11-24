@@ -19,7 +19,7 @@ while True:
     retrieved_chunks = search_chunks(
         query,
         model,
-        top_k=3
+        top_k=5
     )
 
     if not retrieved_chunks:
