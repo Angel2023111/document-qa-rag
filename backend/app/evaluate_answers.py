@@ -8,7 +8,10 @@ from embeddings import model
 from chroma_store import search_chunks
 from llm import generate_answer, evaluate_answer_correctness
 from answer_evaluation_dataset import answer_evaluation_questions
-
+from citation_evaluation import (
+    evaluate_citations,
+    evaluate_citation_relevance
+)
 
 def evaluate_answers(top_k=5):
 
@@ -26,17 +29,6 @@ def evaluate_answers(top_k=5):
             top_k=top_k
         )
 
-        if index == 2:
-            print("\n--- DEBUG: Question 2 retrieved chunks ---")
-
-            for rank, result in enumerate(retrieved_chunks, start=1):
-                metadata = result["metadata"]
-
-                print(f"\nRank: {rank}")
-                print(f"Source: {metadata['source']}")
-                print(f"Page: {metadata['page_number']}")
-                print(f"Chunk: {result['chunk'][:500]}")
-
         # Step 2: Generate answer using the LLM
         generated_answer = generate_answer(
             question,
@@ -48,6 +40,47 @@ def evaluate_answers(top_k=5):
             item["expected_answer"],
             generated_answer
         )
+
+        citation_result = evaluate_citations(
+            generated_answer,
+            retrieved_chunks
+        )
+
+        relevance_results = evaluate_citation_relevance(
+            generated_answer,
+            retrieved_chunks
+        )
+
+        print("\nCitation Evaluation:")
+        print(f"Total Citations: {citation_result['total_citations']}")
+        print(f"Valid Citations: {citation_result['valid_citations']}")
+        print(
+            f"Citation Precision: "
+            f"{citation_result['citation_precision'] * 100:.2f}%"
+        )
+
+        print("\nCitation Relevance Evaluation:")
+        print(
+            f"Total Citations: "
+            f"{relevance_results['total_citations']}"
+        )
+
+        print(
+            f"Supported Citations: "
+            f"{relevance_results['supported_citations']}"
+        )
+
+        print(
+            f"Citation Relevance: "
+            f"{relevance_results['citation_relevance'] * 100:.2f}%"
+        )
+
+        for citation in relevance_results["details"]:
+            print(
+                f"{citation['source']} - Page {citation['page']}: "
+                f"{citation['supported']}"
+            )
+            print(f"Reason: {citation['reason']}")
 
         print("\nCorrectness Evaluation:")
         print(f"Score: {evaluation['score']}/5")
