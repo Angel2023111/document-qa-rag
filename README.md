@@ -81,3 +81,17 @@ python app/main.py
 ## Status
 
 Currently under development.
+
+
+### MMR Retrieval Experiment
+
+Implemented Maximal Marginal Relevance (MMR) to investigate the trade-off between retrieval relevance and diversity.
+
+Compared standard cosine-similarity retrieval against MMR with lambda values of 0.7, 0.5, and 0.3, using 8 evaluation questions and two research papers.
+
+**Results:**
+- Standard similarity search achieved 100% Hit Rate@10 and 100% Recall@10.
+- MMR with lambda = 0.5 achieved the same Hit Rate@10 and Recall@10, with MRR improving from 0.6615 to 0.6823.
+- Lower lambda values did not consistently improve retrieval performance.
+
+**Conclusion:** MMR can improve ranking quality in some cases, but its effectiveness depends on the relevance-diversity trade-off. Standard similarity search remains the default retrieval strategy.

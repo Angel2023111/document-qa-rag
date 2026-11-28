@@ -10,4 +10,6 @@ if not pdf_files:
 else:
     for pdf_path in pdf_files:
         print(f"\nProcessing: {pdf_path.name}")
-        ingest_document(str(pdf_path))
+        ingest_document(
+            str(pdf_path)
+        )

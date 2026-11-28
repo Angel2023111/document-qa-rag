@@ -14,7 +14,7 @@ def generate_document_id(pdf_path):
     return hashlib.sha256(file_content).hexdigest()[:16]
 
 
-def ingest_document(pdf_path):
+def ingest_document(pdf_path, chunk_size=500, overlap=50):
 
     document_id = generate_document_id(pdf_path)
 
@@ -39,7 +39,7 @@ def ingest_document(pdf_path):
     print("Pages extracted:", len(pages))
 
     # Step 2: Generate chunks with page metadata
-    chunks, page_metadata = chunk_document(pages)
+    chunks, page_metadata = chunk_document(pages, chunk_size=chunk_size, overlap=overlap)
 
     print("Total chunks:", len(chunks))
 
