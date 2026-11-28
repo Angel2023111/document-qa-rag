@@ -1,4 +1,5 @@
 import os
+import json
 
 from groq import Groq
 from dotenv import load_dotenv
@@ -84,3 +85,53 @@ def generate_answer(query, retrieved_chunks):
     )
 
     return response.choices[0].message.content
+
+def evaluate_answer_correctness(question, expected_answer, generated_answer):
+
+    judge_prompt = f"""
+    You are an evaluator for a document question-answering system.
+
+    Evaluate the generated answer by comparing it with the reference answer.
+
+    Question:
+    {question}
+
+    Reference Answer:
+    {expected_answer}
+
+    Generated Answer:
+    {generated_answer}
+
+    Evaluate based on factual correctness and whether the generated
+    answer captures the important information in the reference answer.
+
+    Do not penalize the generated answer for using different wording.
+
+    Give a score from 1 to 5:
+    1 = Completely incorrect
+    2 = Mostly incorrect
+    3 = Partially correct
+    4 = Mostly correct
+    5 = Fully correct
+
+    Return ONLY valid JSON in this format:
+    {{
+        "score": 4,
+        "reason": "Brief explanation of the score."
+    }}
+    """
+
+    response = client.chat.completions.create(
+        model=MODEL_NAME,
+        messages=[
+            {
+                "role": "user",
+                "content": judge_prompt
+            }
+        ],
+        temperature=0
+    )
+
+    result = response.choices[0].message.content
+
+    return json.loads(result)
